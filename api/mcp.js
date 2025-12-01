@@ -50,7 +50,7 @@ export default async function handler(req, res) {
         jsonrpc: '2.0',
         result: {
           serverInfo: {
-            name: 'mcp-spotify',
+            name: 'spotify',
             version: '1.0.0'
           }
         },
