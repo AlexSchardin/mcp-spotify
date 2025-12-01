@@ -124,7 +124,29 @@ export default async function handler(req, res) {
         }
       }
 
-      // No valid response found
+      // JSON-RPC notifications (requests without 'id') don't expect a response
+      // Per JSON-RPC 2.0 spec: "A Notification is a Request object without an 'id' member"
+      // Return 204 No Content for successful notification processing
+      if (jsonBody.id === undefined) {
+        // If there was stderr output indicating an error, still report it
+        if (stderrData && stderrData.trim()) {
+          res.status(500).json({
+            jsonrpc: '2.0',
+            error: {
+              code: -32000,
+              message: 'Server error: ' + stderrData.substring(0, 200)
+            },
+            id: null
+          });
+        } else {
+          // Successful notification - no response needed
+          res.status(204).end();
+        }
+        resolve();
+        return;
+      }
+
+      // No valid response found for a request that expected one
       res.status(500).json({
         jsonrpc: '2.0',
         error: {
