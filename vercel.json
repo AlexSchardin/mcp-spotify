@@ -5,7 +5,7 @@
   "installCommand": "npm install",
   "framework": null,
   "functions": {
-    "api/mcp.js": {
+    "api/mcp.cjs": {
       "maxDuration": 30
     }
   },
