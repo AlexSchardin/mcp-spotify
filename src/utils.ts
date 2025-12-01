@@ -4,8 +4,16 @@
 
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 
-export function loadSpotifyConfig() {
-  const config = {
+export interface SpotifyConfig {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+export function loadSpotifyConfig(): SpotifyConfig {
+  const config: SpotifyConfig = {
     clientId: process.env.SPOTIFY_CLIENT_ID || process.env.MCP_CLIENT_ID || '',
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET || process.env.MCP_CLIENT_SECRET || '',
     redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:8888/callback',
@@ -20,14 +28,14 @@ export function loadSpotifyConfig() {
   return config;
 }
 
-export function saveSpotifyConfig(config) {
+export function saveSpotifyConfig(config: SpotifyConfig): void {
   // No-op in stateless mode - credentials are managed externally
   console.log('saveSpotifyConfig called but ignored in stateless mode');
 }
 
-let cachedSpotifyApi = null;
+let cachedSpotifyApi: SpotifyApi | null = null;
 
-export function createSpotifyApi() {
+export function createSpotifyApi(): SpotifyApi {
   if (cachedSpotifyApi) {
     return cachedSpotifyApi;
   }
@@ -51,6 +59,31 @@ export function createSpotifyApi() {
 }
 
 // Stub for authorizeSpotify - not used in stateless mode
-export function authorizeSpotify() {
+export async function authorizeSpotify(): Promise<void> {
   throw new Error('OAuth authorization is not supported in stateless mode. Tokens must be provided via environment variables.');
+}
+
+export function formatDuration(ms: number): string {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = ((ms % 60000) / 1000).toFixed(0);
+  return minutes + ':' + seconds.padStart(2, '0');
+}
+
+export async function handleSpotifyRequest<T>(
+  action: (spotifyApi: SpotifyApi) => Promise<T>,
+): Promise<T> {
+  try {
+    const spotifyApi = createSpotifyApi();
+    return await action(spotifyApi);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (
+      errorMessage.includes('Unexpected token') ||
+      errorMessage.includes('Unexpected non-whitespace character') ||
+      errorMessage.includes('Exponent part is missing a number in JSON')
+    ) {
+      return undefined as T;
+    }
+    throw error;
+  }
 }
