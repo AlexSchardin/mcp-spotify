@@ -43,13 +43,25 @@ export default async function handler(req, res) {
   const authHeader = req.headers.authorization || '';
   let credentials = {};
 
+  console.log('[MCP_API] Authorization header present:', !!authHeader);
+  console.log('[MCP_API] Authorization header starts with Bearer:', authHeader.startsWith('Bearer '));
+
   if (authHeader.startsWith('Bearer ')) {
     try {
-      credentials = JSON.parse(Buffer.from(authHeader.slice(7), 'base64').toString());
+      const decoded = Buffer.from(authHeader.slice(7), 'base64').toString();
+      credentials = JSON.parse(decoded);
+      console.log('[MCP_API] Decoded credentials keys:', Object.keys(credentials));
+      console.log('[MCP_API] Has clientId:', !!credentials.clientId);
+      console.log('[MCP_API] Has clientSecret:', !!credentials.clientSecret);
+      console.log('[MCP_API] Has accessToken:', !!credentials.accessToken);
+      console.log('[MCP_API] Has refreshToken:', !!credentials.refreshToken);
     } catch (e) {
+      console.log('[MCP_API] Failed to parse base64 credentials, using as plain token:', e.message);
       // Fallback: treat as plain access token
       credentials = { accessToken: authHeader.slice(7) };
     }
+  } else {
+    console.log('[MCP_API] No Bearer token found in Authorization header');
   }
 
   // Build environment with ALL credentials injected
