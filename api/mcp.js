@@ -11,7 +11,7 @@ const os = require('os');
 // Configuration from deployment analysis
 const CONFIG_FILE_PATH = "spotify-config.json";
 const LOADING_PATTERN = "file";
-const REQUIRED_CREDENTIALS = [{"name":"clientId","envName":null,"description":"Spotify OAuth client ID","isAppCredential":true},{"name":"clientSecret","envName":null,"description":"Spotify OAuth client secret","isAppCredential":true},{"name":"redirectUri","envName":null,"description":"OAuth redirect URI","isAppCredential":true},{"name":"accessToken","envName":null,"description":"OAuth access token (obtained via auth flow)","isAppCredential":false},{"name":"refreshToken","envName":null,"description":"OAuth refresh token (obtained via auth flow)","isAppCredential":false}];
+const REQUIRED_CREDENTIALS = [{"name":"clientId","envName":null,"description":"OAuth client ID from Spotify Developer Dashboard","isAppCredential":true},{"name":"clientSecret","envName":null,"description":"OAuth client secret from Spotify Developer Dashboard","isAppCredential":true},{"name":"redirectUri","envName":null,"description":"Redirect URI configured in Spotify Developer Dashboard","isAppCredential":true}];
 
 export default async function handler(req, res) {
   // Handle CORS preflight
